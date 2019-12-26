@@ -1,9 +1,28 @@
+import 'package:f_logs/model/flog/flog.dart';
+import 'package:f_logs/model/flog/flog_config.dart';
+import 'package:f_logs/utils/timestamp/timestamp_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/list.dart';
+import 'package:logging/logging.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  MyApp() {
+    LogsConfig config = FLog.getDefaultConfigurations();
+    config.isDevelopmentDebuggingEnabled = true;
+    config.timestampFormat = TimestampFormat.TIME_FORMAT_FULL_2;
+    FLog.applyConfigurations(config);
+
+    FLog.info(
+        className: "Myapp", methodName: "constructor", text: "My log text");
+
+    Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((LogRecord rec) {
+      print('${rec.level.name}: ${rec.time}: ${rec.message}');
+    });
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -21,7 +40,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Pagesss'),
+      home: MyHomePage(title: 'Applications List'),
     );
   }
 }
@@ -67,15 +86,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: ApplicationsList()
-    );
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(widget.title),
+        ),
+        body: ApplicationsList());
+    // Center is a layout widget. It takes a single child and positions it
+    // in the middle of the parent.
 //         Column(
 //          // Column is also a layout widget. It takes a list of children and
 //          // arranges them vertically. By default, it sizes itself to fit its
