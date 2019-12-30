@@ -1,87 +1,116 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:device_apps/device_apps.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app/application_preferences.dart';
 import 'package:launcher_assist/launcher_assist.dart';
 import 'package:logging/logging.dart';
+
+import 'package:flutter/services.dart' show rootBundle;
 
 class ApplicationsList extends StatelessWidget {
   final Logger log = new Logger('ApplicationsList');
 
-  //TODO on web return mock
-  //doesn't have icon
-  Future<List<Application>> apps =
-      InstalledApplicationsProvider().getInstalledApplications();
-
-  ApplicationsList() {
-    LauncherAssist.getAllApps().then((apps) {
-      final List<dynamic> list = apps;
-      final dynamic dy = list.first;
-
-      debugPrint("aaaa");
-      Map<dynamic, dynamic> map = new Map<dynamic, dynamic>.from(dy);
-      print(map);
-      log.fine('Apps list: $map');
-//      map.forEach((key, value) => {
-//        log.fine('key: $key' + ' value: $value');
-//        log.fine('a');
-//      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     String title = "Applications list";
-
     log.fine('Here are the context: $context');
-
     return FutureBuilder(
       builder: (BuildContext context,
-          AsyncSnapshot<List<Application>> applicationList) {
+          AsyncSnapshot<List<InstalledApplication>> applicationList) {
         return ListView.builder(
           itemCount: applicationList.data.length,
           itemBuilder: (context, index) {
-            final item = applicationList.data[index];
-            ApplicationWithIcon itemWithIcon;
-            print("aaa sraka");
-            //LauncherAssist.getAllApps()
-            if (item is ApplicationWithIcon) {
-              itemWithIcon = item;
-              print("printed item with icon");
-              print(itemWithIcon.icon);
-            } else {
-              print("not printed");
-            }
-
-            //print(Image.memory(itemWithIcon.icon));
+            InstalledApplication item = applicationList.data[index];
             return ListTile(
+                onTap: () => onTapped(context, item),
                 leading: new CircleAvatar(
-                  backgroundColor: Colors.blue,
-                  child: new Image(
-                      image: new AssetImage(
-                          itemWithIcon?.icon ?? "icons/ic_launcher.png")),
+                  //backgroundColor: Colors.blue,
+                  child: new Image.memory(item.icon),
                 ),
                 title: Text(item.appName),
-                subtitle: Text(item.apkFilePath));
+                subtitle: Text(item.packageName));
+
           },
         );
       },
-      future: InstalledApplicationsProvider().getInstalledApplications(),
+      future: LauncherAssistProvider().getInstalledApplications(),
     );
   }
 }
 
-//TODO
-class InstalledApplicationsProvider {
-  Future<List<Application>> getInstalledApplications() {
-    //if(kIsWeb)
-    return DeviceApps.getInstalledApplications();
+void onTapped(BuildContext context, InstalledApplication installedApplication) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => ApplicationPreferences()),
+  );
+}
+
+class LauncherAssistProvider {
+
+  LauncherAssistWrapper las = kIsWeb ? LauncherAssistWrapperMock() : LauncherAssistWrapperAndroidImpl();
+
+  LauncherAssistProvider() {
+    print(las);
+  }
+
+  Future<List<InstalledApplication>> getInstalledApplications() async {
+    return las.getInstalledApplications();
   }
 }
 
-//class InstalledApplicationsProvider2 {
-//  Future<dynamic> getInstalledApplications() {
-//    //if(kIsWeb)
-//    return LauncherAssist.getAllApps();
-//  }
-//}
+abstract class LauncherAssistWrapper {
+  Future<List<InstalledApplication>> getInstalledApplications();
+}
+
+class LauncherAssistWrapperMock extends LauncherAssistWrapper {
+  Future<List<InstalledApplication>> getInstalledApplications() async {
+    String appName = "Chrome";
+    String packageName = "com.google.chrome";
+    Uint8List iconByteArray =  Uint8List(3);
+    var iconByteData = await rootBundle.load("/assets/icons/chrome-512.png");
+    Uint8List iconUint8List = iconByteData.buffer.asUint8List(iconByteData.offsetInBytes, iconByteData.lengthInBytes);
+    InstalledApplication ia = InstalledApplication(appName, packageName, iconUint8List);
+    List<InstalledApplication> list = List<InstalledApplication>();
+    list.add(ia);
+
+    return list;
+  }
+}
+
+/**
+ * Used to wrap the map from launcher assist, and return user friendly object
+ */
+class LauncherAssistWrapperAndroidImpl extends LauncherAssistWrapper {
+  Future<List<InstalledApplication>> getInstalledApplications() async {
+    List<InstalledApplication> list = List<InstalledApplication>();
+    List<dynamic> launcherAssistResult = await LauncherAssist.getAllApps();
+
+    for(var application in launcherAssistResult) {
+      Map<dynamic, dynamic> map = new Map<dynamic, dynamic>.from(application);
+      InstalledApplication ia = InstalledApplication(map['label'], map['package'], map['icon']);
+      list.add(ia);
+    }
+    return list;
+  }
+}
+
+
+/**
+ * contains basic data about installed application in the system
+ */
+class InstalledApplication {
+  String appName;
+  String packageName;
+  Uint8List icon; //byte[]
+
+  InstalledApplication(this.appName, this.packageName, this.icon);
+
+  @override
+  String toString() {
+    return 'App name: $appName, Package name: $packageName';
+  }
+}
+
