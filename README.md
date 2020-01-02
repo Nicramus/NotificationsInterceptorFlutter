@@ -2,6 +2,8 @@
 
 A flutter application which primary purpose is to intercept notifications and forward them by user defined rules. This app may be useful to use with MiFit where you can choose sources of the notifications. This app will forward only user-defined notifications for example: notifications from Whatsapp from your friend. 
 
+Project is under construction, this is not even alpha (yet) :-) 
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
