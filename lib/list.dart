@@ -65,6 +65,9 @@ abstract class LauncherAssistWrapper {
   Future<List<InstalledApplication>> getInstalledApplications();
 }
 
+/**
+ * Used to simulate installed apps on web
+ */
 class LauncherAssistWrapperMock extends LauncherAssistWrapper {
   Future<List<InstalledApplication>> getInstalledApplications() async {
     String appName = "Chrome";
@@ -96,7 +99,6 @@ class LauncherAssistWrapperAndroidImpl extends LauncherAssistWrapper {
     return list;
   }
 }
-
 
 /**
  * contains basic data about installed application in the system
