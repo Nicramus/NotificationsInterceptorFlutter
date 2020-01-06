@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/forwarding/filter_rules_dialog_widget.dart';
+import 'package:flutter_app/forwarding/filter_rules_dialog.dart';
 import 'package:logging/logging.dart';
 
 import 'notification_filter.dart';
 
-class ApplicationPreferences extends StatefulWidget {
+class NotificationPreferencesScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => ApplicationPreferencesState();
+  State<StatefulWidget> createState() => NotificationPreferencesScreenState();
 }
 
-class ApplicationPreferencesState extends State<ApplicationPreferences> {
+class NotificationPreferencesScreenState extends State<NotificationPreferencesScreen> {
   final Logger log = new Logger('ApplicationPreferences');
 
   bool isForwardingOn = false;

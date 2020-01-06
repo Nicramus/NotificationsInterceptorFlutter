@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_app/forwarding/application_preferences.dart';
+import 'package:flutter_app/forwarding/notification_preferences_screen.dart';
 import 'package:launcher_assist/launcher_assist.dart';
 import 'package:logging/logging.dart';
 
@@ -42,7 +42,7 @@ class ApplicationsList extends StatelessWidget {
 void onTapped(BuildContext context, InstalledApplication installedApplication) {
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => ApplicationPreferences()),
+    MaterialPageRoute(builder: (context) => NotificationPreferencesScreen()),
   );
 }
 
