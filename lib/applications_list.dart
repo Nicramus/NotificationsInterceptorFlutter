@@ -4,11 +4,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/application_preferences.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_app/forwarding/application_preferences.dart';
 import 'package:launcher_assist/launcher_assist.dart';
 import 'package:logging/logging.dart';
-
-import 'package:flutter/services.dart' show rootBundle;
 
 class ApplicationsList extends StatelessWidget {
   final Logger log = new Logger('ApplicationsList');
@@ -32,7 +31,6 @@ class ApplicationsList extends StatelessWidget {
                 ),
                 title: Text(item.appName),
                 subtitle: Text(item.packageName));
-
           },
         );
       },
@@ -49,8 +47,8 @@ void onTapped(BuildContext context, InstalledApplication installedApplication) {
 }
 
 class LauncherAssistProvider {
-
-  LauncherAssistWrapper las = kIsWeb ? LauncherAssistWrapperMock() : LauncherAssistWrapperAndroidImpl();
+  LauncherAssistWrapper las =
+      kIsWeb ? LauncherAssistWrapperMock() : LauncherAssistWrapperAndroidImpl();
 
   LauncherAssistProvider() {
     print(las);
@@ -72,10 +70,12 @@ class LauncherAssistWrapperMock extends LauncherAssistWrapper {
   Future<List<InstalledApplication>> getInstalledApplications() async {
     String appName = "Chrome";
     String packageName = "com.google.chrome";
-    Uint8List iconByteArray =  Uint8List(3);
+    Uint8List iconByteArray = Uint8List(3);
     var iconByteData = await rootBundle.load("/assets/icons/chrome-512.png");
-    Uint8List iconUint8List = iconByteData.buffer.asUint8List(iconByteData.offsetInBytes, iconByteData.lengthInBytes);
-    InstalledApplication ia = InstalledApplication(appName, packageName, iconUint8List);
+    Uint8List iconUint8List = iconByteData.buffer
+        .asUint8List(iconByteData.offsetInBytes, iconByteData.lengthInBytes);
+    InstalledApplication ia =
+        InstalledApplication(appName, packageName, iconUint8List);
     List<InstalledApplication> list = List<InstalledApplication>();
     list.add(ia);
 
@@ -91,9 +91,10 @@ class LauncherAssistWrapperAndroidImpl extends LauncherAssistWrapper {
     List<InstalledApplication> list = List<InstalledApplication>();
     List<dynamic> launcherAssistResult = await LauncherAssist.getAllApps();
 
-    for(var application in launcherAssistResult) {
+    for (var application in launcherAssistResult) {
       Map<dynamic, dynamic> map = new Map<dynamic, dynamic>.from(application);
-      InstalledApplication ia = InstalledApplication(map['label'], map['package'], map['icon']);
+      InstalledApplication ia =
+          InstalledApplication(map['label'], map['package'], map['icon']);
       list.add(ia);
     }
     return list;
@@ -115,4 +116,3 @@ class InstalledApplication {
     return 'App name: $appName, Package name: $packageName';
   }
 }
-
