@@ -9,7 +9,8 @@ class NotificationPreferencesScreen extends StatefulWidget {
   State<StatefulWidget> createState() => NotificationPreferencesScreenState();
 }
 
-class NotificationPreferencesScreenState extends State<NotificationPreferencesScreen> {
+class NotificationPreferencesScreenState
+    extends State<NotificationPreferencesScreen> {
   final Logger log = new Logger('ApplicationPreferences');
 
   bool isForwardingOn = false;
