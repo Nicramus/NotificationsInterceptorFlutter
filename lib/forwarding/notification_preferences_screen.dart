@@ -17,8 +17,6 @@ class NotificationPreferencesScreenState
 
   List<NotificationFilter> list = List();
 
-  void onForwardingChanged(param) {}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,13 +62,15 @@ class NotificationPreferencesScreenState
         ));
   }
 
-  void editRule(context, item) async {
+  void onForwardingChanged(param) {}
+
+  void editRule(BuildContext context, NotificationFilter item) async {
     await showDialog(
         context: context,
         builder: (ctx) {
           return StatefulBuilder(
             builder: (ctx, setState) {
-              return FilterRuleDialog(list);
+              return new FilterRuleDialog.edit(list, item);
             },
           );
         }).then((val) {

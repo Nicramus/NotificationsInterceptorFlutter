@@ -15,24 +15,28 @@ class FilterRuleDialog extends StatefulWidget {
 
   FilterRuleDialog(this.list);
 
-  FilterRuleDialog.fromFilterRuleDialog(FilterRuleDialog dialog)
-      : list = dialog.list,
-        item = dialog.item;
+  FilterRuleDialog.edit(this.list, this.item);
 
   @override
-  State<StatefulWidget> createState() => FilterRuleDialogState(list);
+  State<StatefulWidget> createState() => FilterRuleDialogState(list, item);
 }
 
 class FilterRuleDialogState extends State<FilterRuleDialog> {
   final String createTitleDialog = "Create a new notification filter";
-  final String editTitleDialog = "Edit an exising rule";
+  final String editTitleDialog = "Edit an existing rule";
   String dropdownValue = 'Accepting';
 
   final textEditingController = TextEditingController();
-  List<NotificationFilter> list;
 
-  FilterRuleDialogState(List<NotificationFilter> list) {
+  List<NotificationFilter> list;
+  NotificationFilter item;
+
+  FilterRuleDialogState(
+      List<NotificationFilter> list, NotificationFilter item) {
     this.list = list;
+    this.item = item;
+    String value = item == null ? "" : item.filterName;
+    textEditingController.text = value;
   }
 
   @override
@@ -73,7 +77,9 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
             mainAxisSize: MainAxisSize.min, // To make the card compact
             children: <Widget>[
               Text(
-                createTitleDialog,
+                this.item == null
+                    ? this.createTitleDialog
+                    : this.editTitleDialog,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
@@ -82,7 +88,9 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
               ),
               SizedBox(height: 16.0),
               TextFormField(
+                //filter rule name visible on screen
                 controller: textEditingController,
+                //initialValue:  this.item == null ? "" : this,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.label),
                   hintText: 'Name of the rule visible on the list',
@@ -155,7 +163,7 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                     list.add(forwardingRule);
                     Navigator.of(context).pop(); // To close the dialog
                   },
-                  child: Text("CREATE"),
+                  child: Text(this.item == null ? "CREATE" : "SAVE"),
                 ),
               ),
             ],
