@@ -7,6 +7,7 @@ class NotificationFilter {
   String filterName;
   String key;
   String titleFilterValue;
+  ForwardingMode forwardingMode;
 
   NotificationFilter() {
     this.key = randomString(10);
@@ -21,3 +22,5 @@ class NotificationFilter {
     return new String.fromCharCodes(codeUnits);
   }
 }
+
+enum ForwardingMode { Accepting, Rejecting }

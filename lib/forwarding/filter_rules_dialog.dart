@@ -24,12 +24,13 @@ class FilterRuleDialog extends StatefulWidget {
 class FilterRuleDialogState extends State<FilterRuleDialog> {
   final String createTitleDialog = "Create a new notification filter";
   final String editTitleDialog = "Edit an existing rule";
-  String dropdownValue = 'Accepting';
 
   final textEditingController = TextEditingController();
 
   List<NotificationFilter> list;
   NotificationFilter item;
+
+  bool isEditMode = false;
 
   FilterRuleDialogState(
       List<NotificationFilter> list, NotificationFilter item) {
@@ -37,6 +38,9 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
     this.item = item;
     String value = item == null ? "" : item.filterName;
     textEditingController.text = value;
+
+    //if notification filter is not null then widget is for an editing
+    this.isEditMode = item != null ? true : false;
   }
 
   @override
@@ -77,9 +81,9 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
             mainAxisSize: MainAxisSize.min, // To make the card compact
             children: <Widget>[
               Text(
-                this.item == null
-                    ? this.createTitleDialog
-                    : this.editTitleDialog,
+                this.isEditMode
+                    ? this.editTitleDialog
+                    : this.createTitleDialog,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
@@ -119,8 +123,8 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 },
               ),
               SizedBox(height: 16.0),
-              DropdownButton<String>(
-                  value: dropdownValue,
+              DropdownButton<ForwardingMode>(
+                  value: isEditMode ? item.forwardingMode : ForwardingMode.Accepting,
                   //icon: Icon(Icons.arrow_downward),
                   iconSize: 24,
                   elevation: 16,
@@ -129,22 +133,22 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                     height: 2,
                     color: Colors.deepPurpleAccent,
                   ),
-                  onChanged: (String newValue) {
+                  onChanged: (ForwardingMode newValue) {
                     setState(() {
-                      dropdownValue = newValue;
+                      item.forwardingMode = newValue;
                     });
                   },
                   items: [
-                    DropdownMenuItem<String>(
-                        value: "Accepting",
+                    DropdownMenuItem<ForwardingMode>(
+                        value: ForwardingMode.Accepting,
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.thumb_up, color: Colors.green),
                             Text('Accepting'),
                           ],
                         )),
-                    DropdownMenuItem<String>(
-                        value: "Rejecting",
+                    DropdownMenuItem<ForwardingMode>(
+                        value: ForwardingMode.Rejecting,
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.block, color: Colors.red),
@@ -156,14 +160,17 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 alignment: Alignment.bottomRight,
                 child: FlatButton(
                   onPressed: () {
-                    print(textEditingController.text);
-                    print(list);
-                    NotificationFilter forwardingRule = NotificationFilter();
-                    forwardingRule.filterName = textEditingController.text;
-                    list.add(forwardingRule);
+                    if(this.isEditMode) {
+                      item.filterName = this.textEditingController.text;
+                    } else {
+                      //if not in edit mode - create a new rule
+                      NotificationFilter forwardingRule = NotificationFilter();
+                      forwardingRule.filterName = textEditingController.text;
+                      list.add(forwardingRule);
+                    }
                     Navigator.of(context).pop(); // To close the dialog
                   },
-                  child: Text(this.item == null ? "CREATE" : "SAVE"),
+                  child: Text(this.isEditMode ? "SAVE" : "CREATE"),
                 ),
               ),
             ],
