@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import 'notification_filter.dart';
 
@@ -22,31 +23,50 @@ class FilterRuleDialog extends StatefulWidget {
 }
 
 class FilterRuleDialogState extends State<FilterRuleDialog> {
-  final String createTitleDialog = "Create a new notification filter";
-  final String editTitleDialog = "Edit an existing rule";
+  final Logger log = new Logger('FilterRuleDialogState');
 
-  final textEditingController = TextEditingController();
+  final String createTitleDialog = "Create a new notification filter";
+  final String editTitleDialog = "Edit an existing filter";
+
+  final nameTextEditingController = TextEditingController();
+  final valueTextEditingController = TextEditingController();
+
+  final filterNameFormKey = GlobalKey<FormState>();
+  //the value of the filter which is used to filter specific notifications
+  final filterValueFormKey = GlobalKey<FormState>();
 
   List<NotificationFilter> list;
-  NotificationFilter item;
+  NotificationFilter filterItem;
 
   bool isEditMode = false;
 
   FilterRuleDialogState(
       List<NotificationFilter> list, NotificationFilter item) {
     this.list = list;
-    this.item = item;
-    String value = item == null ? "" : item.filterName;
-    textEditingController.text = value;
+    this.filterItem = item;
 
     //if notification filter is not null then widget is for an editing
     this.isEditMode = item != null ? true : false;
+    setInitialState();
+  }
+
+  void setInitialState() {
+    this.filterItem =
+        this.isEditMode ? this.filterItem : new NotificationFilter();
+    String value = this.isEditMode ? this.filterItem.filterName : "";
+    this.nameTextEditingController.text = value;
+    //when new filter - accepting by default
+    this.filterItem.forwardingMode = this.isEditMode
+        ? this.filterItem.forwardingMode
+        : ForwardingMode.Accepting;
+
+    this.log.fine("setInitialState $value");
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    textEditingController.dispose();
+    nameTextEditingController.dispose();
     super.dispose();
   }
 
@@ -81,9 +101,7 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
             mainAxisSize: MainAxisSize.min, // To make the card compact
             children: <Widget>[
               Text(
-                this.isEditMode
-                    ? this.editTitleDialog
-                    : this.createTitleDialog,
+                this.isEditMode ? this.editTitleDialog : this.createTitleDialog,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
@@ -91,40 +109,50 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 ),
               ),
               SizedBox(height: 16.0),
-              TextFormField(
-                //filter rule name visible on screen
-                controller: textEditingController,
-                //initialValue:  this.item == null ? "" : this,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.label),
-                  hintText: 'Name of the rule visible on the list',
-                  labelText: 'Filter name',
-                ),
-                onSaved: (String value) {
-                  print(value);
-                },
-                validator: (String value) {
-                  return value.contains('@') ? 'Do not use the @ char.' : null;
-                },
-              ),
+              Form(
+                  key: filterNameFormKey,
+                  child: TextFormField(
+                    //filter rule name visible on screen
+                    controller: nameTextEditingController,
+                    //initialValue:  this.item == null ? "" : this,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.label),
+                      hintText: 'Name of the rule visible on the list',
+                      labelText: 'Filter name',
+                    ),
+                    onSaved: (String value) {
+                      print(value);
+                    },
+                    validator: (String value) {
+                      return value.isEmpty
+                          ? 'Name of the filter rule cannot be an empty'
+                          : null;
+                    },
+                  )),
               SizedBox(height: 16.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.filter_list),
-                  hintText: 'Name of the rule visible on the list',
-                  labelText: 'Notifications Title contains',
+              Form(
+                key: filterValueFormKey,
+                child: TextFormField(
+                  controller: valueTextEditingController,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.filter_list),
+                    hintText: 'Name of the rule visible on the list',
+                    labelText: 'Notifications Title contains',
+                  ),
+                  onSaved: (String value) {
+                    // This optional block of code can be used to run
+                    // code when the user saves the form.
+                  },
+                  validator: (String value) {
+                    return value.isEmpty
+                        ? 'Name of the filter rule cannot be an empty'
+                        : null;
+                  },
                 ),
-                onSaved: (String value) {
-                  // This optional block of code can be used to run
-                  // code when the user saves the form.
-                },
-                validator: (String value) {
-                  return value.contains('@') ? 'Do not use the @ char.' : null;
-                },
               ),
               SizedBox(height: 16.0),
               DropdownButton<ForwardingMode>(
-                  value: isEditMode ? item.forwardingMode : ForwardingMode.Accepting,
+                  value: this.filterItem.forwardingMode,
                   //icon: Icon(Icons.arrow_downward),
                   iconSize: 24,
                   elevation: 16,
@@ -135,7 +163,7 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                   ),
                   onChanged: (ForwardingMode newValue) {
                     setState(() {
-                      item.forwardingMode = newValue;
+                      this.filterItem.forwardingMode = newValue;
                     });
                   },
                   items: [
@@ -160,17 +188,30 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 alignment: Alignment.bottomRight,
                 child: FlatButton(
                   onPressed: () {
-                    if(this.isEditMode) {
-                      item.filterName = this.textEditingController.text;
+                    if (this.isEditMode) {
+                      this.filterItem.filterName =
+                          this.nameTextEditingController.text;
                     } else {
                       //if not in edit mode - create a new rule
-                      NotificationFilter forwardingRule = NotificationFilter();
-                      forwardingRule.filterName = textEditingController.text;
-                      list.add(forwardingRule);
+                      this.filterItem.filterName = nameTextEditingController.text;
+                      list.add(filterItem);
                     }
-                    Navigator.of(context).pop(); // To close the dialog
+                    //form validation
+                    if (this.filterNameFormKey.currentState.validate()) {
+                      log.fine("validation done");
+                      Navigator.of(context).pop(); // To close the dialog
+                    }
                   },
                   child: Text(this.isEditMode ? "SAVE" : "CREATE"),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: FlatButton(
+                  onPressed: () {
+                      Navigator.of(context).pop(); // To close the dialog
+                  },
+                  child: Text("CANCEL"),
                 ),
               ),
             ],
