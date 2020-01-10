@@ -28,11 +28,10 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
   final String createTitleDialog = "Create a new notification filter";
   final String editTitleDialog = "Edit an existing filter";
 
-  final nameTextEditingController = TextEditingController();
-  final valueTextEditingController = TextEditingController();
+  final nameController = TextEditingController();
+  final valueController = TextEditingController();
 
   final filterNameFormKey = GlobalKey<FormState>();
-  //the value of the filter which is used to filter specific notifications
   final filterValueFormKey = GlobalKey<FormState>();
 
   List<NotificationFilter> list;
@@ -53,20 +52,24 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
   void setInitialState() {
     this.filterItem =
         this.isEditMode ? this.filterItem : new NotificationFilter();
-    String value = this.isEditMode ? this.filterItem.filterName : "";
-    this.nameTextEditingController.text = value;
+    String filterName = this.isEditMode ? this.filterItem.filterName : "";
+    String filterValue = this.isEditMode ? this.filterItem.value : "";
+    this.nameController.text = filterName;
+    this.valueController.text = filterValue;
     //when new filter - accepting by default
     this.filterItem.forwardingMode = this.isEditMode
         ? this.filterItem.forwardingMode
         : ForwardingMode.Accepting;
 
-    this.log.fine("setInitialState $value");
+    this.log.fine("filter name $filterName");
+    this.log.fine("filter name $filterValue");
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    nameTextEditingController.dispose();
+    nameController.dispose();
+    valueController.dispose();
     super.dispose();
   }
 
@@ -113,7 +116,7 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                   key: filterNameFormKey,
                   child: TextFormField(
                     //filter rule name visible on screen
-                    controller: nameTextEditingController,
+                    controller: nameController,
                     //initialValue:  this.item == null ? "" : this,
                     decoration: const InputDecoration(
                       icon: Icon(Icons.label),
@@ -133,19 +136,20 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
               Form(
                 key: filterValueFormKey,
                 child: TextFormField(
-                  controller: valueTextEditingController,
+                  controller: valueController,
                   decoration: const InputDecoration(
                     icon: Icon(Icons.filter_list),
                     hintText: 'Name of the rule visible on the list',
                     labelText: 'Notifications Title contains',
                   ),
                   onSaved: (String value) {
+                    print(value);
                     // This optional block of code can be used to run
                     // code when the user saves the form.
                   },
                   validator: (String value) {
                     return value.isEmpty
-                        ? 'Name of the filter rule cannot be an empty'
+                        ? 'Value of the filter rule cannot be an empty'
                         : null;
                   },
                 ),
@@ -188,17 +192,12 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 alignment: Alignment.bottomRight,
                 child: FlatButton(
                   onPressed: () {
-                    if (this.isEditMode) {
-                      this.filterItem.filterName =
-                          this.nameTextEditingController.text;
-                    } else {
-                      //if not in edit mode - create a new rule
-                      this.filterItem.filterName = nameTextEditingController.text;
-                      list.add(filterItem);
-                    }
-                    //form validation
-                    if (this.filterNameFormKey.currentState.validate()) {
+                    if (this.filterNameFormKey.currentState.validate() &&
+                        this.filterValueFormKey.currentState.validate()) {
                       log.fine("validation done");
+                      this.filterItem.filterName = this.nameController.text;
+                      this.filterItem.value = this.valueController.text;
+                      if (!this.isEditMode) list.add(filterItem);
                       Navigator.of(context).pop(); // To close the dialog
                     }
                   },
@@ -209,7 +208,7 @@ class FilterRuleDialogState extends State<FilterRuleDialog> {
                 alignment: Alignment.bottomLeft,
                 child: FlatButton(
                   onPressed: () {
-                      Navigator.of(context).pop(); // To close the dialog
+                    Navigator.of(context).pop(); // To close the dialog
                   },
                   child: Text("CANCEL"),
                 ),

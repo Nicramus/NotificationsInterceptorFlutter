@@ -1,12 +1,19 @@
 import 'dart:math';
 
+import 'package:hive/hive.dart';
+
 /**
  * Class which represents forwarding rule
  */
-class NotificationFilter {
+@HiveType(typeId: 0)
+class NotificationFilter extends HiveObject {
+  @HiveField(0)
   String filterName;
+  @HiveField(1)
   String key;
-  String titleFilterValue;
+  @HiveField(2)
+  String value;
+  @HiveField(3)
   ForwardingMode forwardingMode;
 
   NotificationFilter() {
