@@ -31,7 +31,7 @@ class MainActivity: FlutterActivity() {
 
     }
 
-    protected override fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             RestartServiceBroadcastReceiver.scheduleJob(getApplicationContext())

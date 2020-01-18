@@ -63,13 +63,13 @@ class NotificationService : Service() {
      * after the service is created."
      */
     fun restartForeground() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //android marshmallow 6.0
             Log.i(TAG, "restarting foreground")
             try {
                 val notification = Notification()
                 startForeground(NOTIFICATION_ID, notification
                         .setNotification(this, "Service notification",
-                                "This is the service's notification", R.drawable.ic_sleep))
+                                "Notification service interceptor is up", R.drawable.ic_sleep))
                 Log.i(TAG, "restarting foreground successful")
                 notificationServiceLogic()
             } catch (e: Exception) {

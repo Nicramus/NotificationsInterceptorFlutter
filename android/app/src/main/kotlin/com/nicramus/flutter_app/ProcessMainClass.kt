@@ -35,7 +35,7 @@ class ProcessMainClass {
         setServiceIntent(context)
         // depending on the version of Android we eitehr launch the simple service (version<O)
         // or we start a foreground service
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //ANDROID 8.0 or higher
             context!!.startForegroundService(serviceIntent)
         } else {
             context!!.startService(serviceIntent)
