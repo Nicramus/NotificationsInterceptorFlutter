@@ -3,18 +3,25 @@
  */
 package com.nicramus.flutter_app
 
+import android.annotation.TargetApi
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.app.Service
+import android.service.notification.NotificationListenerService
+import android.service.notification.StatusBarNotification
 
 import java.util.Timer
 import java.util.TimerTask
 
 import com.nicramus.flutter_app.Notification
 
-class NotificationService : Service() {
+
+//a) albo extends NotificationListenerService (i sprawdzamy czy to zadziała)
+//b) albo extends Service (i odpalamy ListenerService z Servica) używając metody notificationServiceLogic()
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+class NotificationService : NotificationListenerService() {
     private var counter = 0
     internal var oldTime: Long = 0
 
@@ -43,7 +50,7 @@ class NotificationService : Service() {
             restartForeground()
         }
 
-        notificationServiceLogic()
+        //notificationServiceLogic()
 
         // return start sticky so if it is killed by android, it will be restarted with Intent null
         return START_STICKY
@@ -53,6 +60,14 @@ class NotificationService : Service() {
         return null
     }
 
+
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        //here use the notification filter object - to intercept only required notifications
+    }
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification) {
+
+    }
 
     /**
      * it starts the process in foreground. Normally this is done when screen goes off
@@ -71,7 +86,7 @@ class NotificationService : Service() {
                         .setNotification(this, "Service notification",
                                 "Notification service interceptor is up", R.drawable.ic_sleep))
                 Log.i(TAG, "restarting foreground successful")
-                notificationServiceLogic()
+                //notificationServiceLogic()
             } catch (e: Exception) {
                 Log.e(TAG, "Error in notification " + e.message)
             }
@@ -108,6 +123,7 @@ class NotificationService : Service() {
         // stoptimertask();
     }
 
+    //not used (by now)
     fun notificationServiceLogic() {
         Log.i(TAG, "Starting timer")
 
